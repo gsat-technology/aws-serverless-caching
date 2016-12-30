@@ -1,31 +1,28 @@
 //United States, Australia, Brazil, Canada, Ireland, Germany, United Kingdom, South Korea, Singapore, India, Brazil
 
+var URL = 'https://h09f584p6g.execute-api.ap-southeast-2.amazonaws.com/prod';
+
 var target = '#data';
 var customFields = {
 	data: {
 		1: {
-			enabled: true,
-			fieldName: 'COMPANYCODE',
+			fullName: 'COMPANYCODE',
 			prettyName: 'Company Name',
-			fieldType: 'OEM',
+			country: 'Australia',
 			fieldValue: ''
 		}
 	},
 	xref: { // Key ['Label','column width',0|1] 1=admin only
-		custom: ['#', '10%',0],
+		id: ['id', '10%',0],
 		actions: ['Actions', '5%',1],
-		enabled: ['Enabled','5%',0],
-		fieldName: ['Field', '20%',0],
+		fullName: ['FullName', '20%',0],
 		prettyName: ['Pretty Name','20%',0],
-		fieldType: ['Type','30%',0],
+		country: ['country','30%',0],
 		fieldValue: ['Value','10%',0]
 	},
-	fieldTypes: [
-		[' ',' '],
-		['ENV','Environment (ENV)'],
-		['REG','Registry (REG)'],
-		['WMI','Windows Management Inst. (WMI)'],
-		['OEM','Original Equipment Manuf.(OEM)']
+	countries: [
+		'Australia',
+		'Brazil'
 	],
 	mode: {
 		row1: 'view',
@@ -41,6 +38,15 @@ var customFields = {
 	multiedit: false,
 	admin: true
 }
+
+
+function ajaxAllAccounts() {
+	$.get(URL + '/account', function(data, status){
+		console.log("Data: " + data + "\nStatus: " + status);
+	});
+}
+
+ajaxAllAccounts();
 
 function getCustomFields(id) {
 	if(id) { // return requested array id
@@ -65,18 +71,18 @@ function getTableHeaders() {
 	var headers = customFields.xref;
 	return headers;
 }
-function buildFieldTypeSelect(selected,id) {
-	var t = customFields.fieldTypes;
+function buildCountrySelect(selected,id) {
+	var t = customFields.countries;
 	var options = '';
 	var limit = t.length;
 	if(id > 2) { // limit OEM to Custom 1 & 2 only
 		limit = limit - 1;
 	}
-	for(i=0;i<limit; i++) {
-		if(t[i][0] == selected) {
-			options += '<option value="' + t[i][0] + '" selected>' + t[i][1] + '</option>'
+	for(i=0;i<t.length; i++) {
+		if(t[i] == selected) {
+			options += '<option value="' + t[i] + '" selected>' + t[i] + '</option>'
 		} else {
-			options += '<option value="' + t[i][0] + '">' + t[i][1] + '</option>'
+			options += '<option value="' + t[i] + '">' + t[i] + '</option>'
 		}
 	}
 	return options;
@@ -100,31 +106,29 @@ function buildTable(target) {
 	$(target).append(hdata);
 	rdata += '<tbody>';
 	for(key in data) {
+
 		rdata +=('<tr data-id="' + key + '">');
-		rdata +=('<td><span>Custom ' + key + ':</span></td>');
+		rdata +=('<td><span>id ' + key + ':</span></td>');
 		if(customFields.admin) {
 			rdata += '<td class="text-center"><button class="btn btn-xs btn-info" data-edit="' + key + '"><span class="fa fa-pencil"></span></button><button class="btn btn-xs btn-success" style="display:none;" data-save="' + key + '"><span class="fa fa-floppy-o"></span></button><button class="btn btn-xs btn-danger" style="display:none;" data-cancel="' + key + '"><span class="fa fa-ban"></span></button></td>';
 		}
 		for(subkey in data[key]) {
+
 			switch(subkey) {
-				case 'enabled':
-					var checked = '';
-					if(data[key][subkey] == true) {
-						var checked = 'checked';
-					}
-					rdata += '<td class="text-center"><input type="checkbox" data-field="enabled" disabled '+ checked + ' /></td>';
-					break;
-				case 'fieldType':
-					var fieldTypeName = '';
-					var fieldTypeVal = '';
-					$.each(customFields.fieldTypes, function(i, l) {
-						if(l[0] == data[key][subkey]) {
-							fieldTypeName = customFields.fieldTypes[i][1];
-							fieldTypeVal = customFields.fieldTypes[i][0];
+				case 'country':
+
+					var countryName = '';
+					var countryVal = '';
+					$.each(customFields.countries, function(i, l) {
+
+						if(l == data[key][subkey]) {
+
+							countryName = customFields.countries[i];
+							countryVal = customFields.countries[i];
 						}
-					})
-					rdata += '<td><span class="field" data-field="' + subkey + '">' + fieldTypeName + '</span><select class="form-control input-sm" data-field="' + subkey + '" style="display:none;">';
-					var options = buildFieldTypeSelect(data[key][subkey],key);
+					});
+					rdata += '<td><span class="field" data-field="' + subkey + '">' + countryName + '</span><select class="form-control input-sm" data-field="' + subkey + '" style="display:none;">';
+					var options = buildCountrySelect(data[key][subkey],key);
 					rdata += options + '</select></td>';
 					break;
 				default:
@@ -147,7 +151,7 @@ function resetForm(target) {
 	$(target + ' tfoot tr').attr('data-id', newID);
 }
 function checkForDisabled(id) {
-	var value = $(target + ' tr[data-id="' + id + '"] select[data-field="fieldType"] option:selected ').val();
+	var value = $(target + ' tr[data-id="' + id + '"] select[data-field="country"] option:selected ').val();
 	if(value == 'OEM') {
 		$(target + ' tr[data-id="' + id + '"] input[data-field="fieldValue"]').prop({disabled:true});
 	} else {
@@ -156,38 +160,37 @@ function checkForDisabled(id) {
 }
 function updateFields(id,type) {
 	// Read Currently stored
-	var fieldName = customFields.data[id].fieldName;
+	var fullName = customFields.data[id].fullName;
 	var prettyName = customFields.data[id].prettyName;
-	var fieldType = customFields.data[id].fieldType;
+	var country = customFields.data[id].country;
 	var fieldValue = customFields.data[id].fieldValue;
-	var enabled = customFields.data[id].enabled;
+
 	if(type == 'save') {
 		// Update from fields
-		var fieldName = $(target + ' tr[data-id="' + id + '"] input[data-field="fieldName"]').val();
+		var fullName = $(target + ' tr[data-id="' + id + '"] input[data-field="fullName"]').val();
 		var prettyName = $(target + ' tr[data-id="' + id + '"] input[data-field="prettyName"]').val();
-		var fieldType = $(target + ' tr[data-id="' + id + '"] select[data-field="fieldType"] option:selected').val();
+		var country = $(target + ' tr[data-id="' + id + '"] select[data-field="country"] option:selected').val();
 		var fieldValue = $(target + ' tr[data-id="' + id + '"] input[data-field="fieldValue"]').val();
-		var enabled = $(target + ' tr[data-id="' + id + '"] input[data-field="enabled"]').is(':checked');	
+
 	}
 	if(type == 'cancel') {
 		// Update from fields
-		$(target + ' tr[data-id="' + id + '"] input[data-field="fieldName"]').val(fieldName);
+		$(target + ' tr[data-id="' + id + '"] input[data-field="fullName"]').val(fullName);
 		$(target + ' tr[data-id="' + id + '"] input[data-field="prettyName"]').val(prettyName);
-		$(target + ' tr[data-id="' + id + '"] select[data-field="fieldType"]').val(fieldType);
+		$(target + ' tr[data-id="' + id + '"] select[data-field="country"]').val(country);
 		$(target + ' tr[data-id="' + id + '"] input[data-field="fieldValue"]').val(fieldValue);
-		$(target + ' tr[data-id="' + id + '"] input[data-field="enabled"]').prop('checked', enabled);	
+
 	}
 	// Update stored values
-	var nData = {}
-	nData.enabled = enabled;
-	nData.fieldName = replaceSpecialChar(fieldName);
+	var nData = {};
+	nData.fullName = replaceSpecialChar(fullName);
 	nData.prettyName = prettyName;
-	nData.fieldType = fieldType;
+	nData.country = country;
 	nData.fieldValue = fieldValue;
 	customFields.data[id] = nData;
-	$(target + ' tr[data-id="' + id + '"] .field[data-field="fieldName"]').html(fieldName);
+	$(target + ' tr[data-id="' + id + '"] .field[data-field="fullName"]').html(fullName);
 	$(target + ' tr[data-id="' + id + '"] .field[data-field="prettyName"]').html(prettyName);
-	$(target + ' tr[data-id="' + id + '"] .field[data-field="fieldType"]').html(fieldType);
+	$(target + ' tr[data-id="' + id + '"] .field[data-field="country"]').html(country);
 	$(target + ' tr[data-id="' + id + '"] .field[data-field="fieldValue"]').html(fieldValue);
 };
 function toggleRow(row) {
@@ -205,29 +208,26 @@ function changeMode(row,element,type) {
 		case 'edit' : // 
 			checkForDisabled(row);
 			toggleRow(row);
-			$(target + ' tr[data-id="' + row + '"] td input[data-field="enabled"]').prop({disabled:false});
 			break;
 		case 'save' :
 			updateFields(row,type);
 			toggleRow(row);
-			$(target + ' tr[data-id="' + row + '"] td input[data-field="enabled"]').prop({disabled:true});
 			break;
 		case 'cancel' :
 			updateFields(row,type);
 			toggleRow(row);
-			$(target + ' tr[data-id="' + row + '"] td input[data-field="enabled"]').prop({disabled:true});
 		default :
 			break;
 	}
 }
 function initializeButtons() {
 	console.log('initializeButtons()');
-	$(target + ' select[data-field="fieldType"]').on('change', function(e) {
+	$(target + ' select[data-field="country"]').on('change', function(e) {
 		e.preventDefault();
 		var id = $(this).parent().parent().data('id');
 		checkForDisabled(id);	
 	});
-	$(target + ' input[data-field="fieldName"]').on('focusout', function(e) {
+	$(target + ' input[data-field="fullName"]').on('focusout', function(e) {
 		var value = $(this).val();
 		value = replaceSpecialChar(value);
 		$(this).val(value);
@@ -285,10 +285,9 @@ $('#add-button').on('click', function() {
 	console.log(newKey);
 
 	updatedData[newKey] = {
-		enabled: true,
-		fieldName: '',
+		fullName: '',
 		prettyName: '',
-		fieldType: '',
+		country: '',
 		fieldValue: ''
 	};
 
