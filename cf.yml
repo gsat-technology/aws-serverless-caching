@@ -257,6 +257,7 @@ Resources:
                   - dynamodb:GetItem
                   - dynamodb:PutItem
                   - dynamodb:DeleteItem
+                  - dynamodb:Scan
                 Resource:
                   !Join [ "", [ "arn:aws:dynamodb:", !Ref "AWS::Region", ":", !Ref "AWS::AccountId", ":table/", !Ref DynamoDBTable  ] ]
 

@@ -67,6 +67,26 @@ def get_account(id, use_cache):
             return None
 
 
+def get_all_accounts():
+
+    #Note - no need to attempt using cache...
+    #it's not possible to 'get all keys' with memcached
+
+    print('get_all_accounts()')
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table(dynamodb_table)
+
+    try:
+        db_result = table.scan()
+    except:
+        return None
+
+    return {
+        'accounts': db_result['Items'],
+        'count': db_result['Count']
+        }
+
+
 def put_account(account_dict):
     print('put_account(): ' + json.dumps(account_dict))
 
@@ -115,38 +135,47 @@ def handler(event, context):
     if event['httpMethod'] == 'GET':
         print('GET')
 
+        use_cache = True
+
+        try:
+            cache_control = event['headers']['Cache-Control']
+            print('got the Cache-Control header')
+            if cache_control == 'no-cache':
+                print('got the no-cache header')
+                use_cache = False
+        except:
+            pass
+
+
+        #Get account
         if event['resource'] == "/account/{id}":
-
-            use_cache = True
-
-            try:
-                cache_control = event['headers']['Cache-Control']
-                if cache_control == 'no-cache':
-                    use_cache = False
-            except:
-                pass
-
-            print(use_cache)
 
             response_body_dict = get_account(event['pathParameters']['id'], use_cache)
 
             if response_body_dict:
-                print('got it')
                 response['statusCode'] = 200
                 response['body'] = json.dumps(response_body_dict)
             else:
                 response['statusCode'] = 404
                 response['body'] = json.dumps({"error": "resource does not exist"})
 
+        #List accounts
+        elif event['resource'] == "/account":
+            result = get_all_accounts()
+            if result:
+                response['statusCode'] = 200
+                response['body'] = json.dumps(result)
+            else:
+                response['statusCode'] = 404
+                response['body'] = json.dumps({"success": "false"})
+
+    #Create account
     elif event['httpMethod'] == 'POST':
-        print('PUT')
+        print('POST')
 
         if event['resource'] == "/account":
 
             body = json.loads(event['body'])
-            print(body)
-            print(type(body))
-
             result = put_account(body)
 
             if result:
@@ -156,6 +185,7 @@ def handler(event, context):
                 response['statusCode'] = 404
                 response['body'] = json.dumps(result)
 
+    #Delete account
     elif event['httpMethod'] == 'DELETE':
         if event['resource'] == "/account/{id}":
             result = delete_account(event['pathParameters']['id'])
@@ -166,5 +196,21 @@ def handler(event, context):
             else:
                 response['statusCode'] = 404
                 response['body'] = json.dumps({"success": "false"})
+
+    #Update account
+    elif event['httpMethod'] == 'PUT':
+        print('POST')
+
+        if event['resource'] == "/account/{id}":
+
+            body = json.loads(event['body'])
+            result = put_account(body)
+
+            if result:
+                response['statusCode'] = 200
+                response['body'] = json.dumps(result)
+            else:
+                response['statusCode'] = 404
+                response['body'] = json.dumps(result)
 
     return response
