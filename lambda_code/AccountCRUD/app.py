@@ -128,7 +128,9 @@ def handler(event, context):
 
     response = {
         "statusCode": None,
-        "headers": { "Content-Type": "application/json" },
+        "headers": {
+            "Content-Type": "application/json"
+        },
         "body": None
     }
 
