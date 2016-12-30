@@ -27,7 +27,8 @@ def handler(event, context):
 
             #convert from dynamodb item structure to python dict
             item = {
-                #'id': image['id']['N'],
+                #note - leaving the id in the structure
+                'id': image['id']['S'],
                 'full_name': image['full_name']['S'],
                 'avatar': image['avatar']['S'],
                 'country': image['country']['S']

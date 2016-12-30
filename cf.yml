@@ -255,6 +255,8 @@ Resources:
                 Effect: "Allow"
                 Action:
                   - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:DeleteItem
                 Resource:
                   !Join [ "", [ "arn:aws:dynamodb:", !Ref "AWS::Region", ":", !Ref "AWS::AccountId", ":table/", !Ref DynamoDBTable  ] ]
 
@@ -400,7 +402,6 @@ Resources:
           elasticache_dns: !GetAtt Elasticache.ConfigurationEndpoint.Address
           elasticache_port: !GetAtt Elasticache.ConfigurationEndpoint.Port
           dynamodb_table: !Ref DynamoDBTable
-          use_elasticache: !Ref UseElasticache
 
   LambdaPopulateDynamoDB:
     Type: "AWS::Lambda::Function"
