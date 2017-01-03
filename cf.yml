@@ -13,14 +13,6 @@ Parameters:
     Type: AWS::EC2::KeyPair::KeyName
     Description: Keypair for EC2 instance
 
-  UseElasticache:
-    Type: String
-    Default: true
-    AllowedValues:
-      - true
-      - false
-    Description: Use elasticache to cache dynamodb items
-
 
 Resources:
 
@@ -544,3 +536,20 @@ Resources:
               Fn::GetAtt:
               - LambdaAccountCRUD
               - Arn
+
+  APIGDeploymentDemo:
+    DependsOn:
+      - AccountResourceAny
+      - AccountIDResourceAny
+    Type: "AWS::ApiGateway::Deployment"
+    Properties:
+      RestApiId:
+        !Ref APIGateway
+      StageName: demo
+
+Outputs:
+  ElasticacheConfigurationEndpoint:
+    Description: Configuration endpoint for elasticache cluster
+    Value: !GetAtt Elasticache.ConfigurationEndpoint.Address
+
+    

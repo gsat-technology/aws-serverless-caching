@@ -21,6 +21,8 @@ memcache_client = HashClient(nodes)
 
 
 dynamodb_table = os.environ['dynamodb_table']
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table(dynamodb_table)
 
 
 def get_account(id, use_cache):
@@ -53,8 +55,7 @@ def get_account(id, use_cache):
     #if elasticache wasn't tried or it tried and missed, then use db
     if response_item['account'] == None:
         print('trying dynamodb')
-        dynamodb = boto3.resource('dynamodb')
-        table = dynamodb.Table(dynamodb_table)
+
         db_result = table.get_item(Key={'id': id})
         print(json.dumps(db_result))
 
@@ -73,8 +74,6 @@ def get_all_accounts():
     #it's not possible to 'get all keys' with memcached
 
     print('get_all_accounts()')
-    dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table(dynamodb_table)
 
     try:
         db_result = table.scan()
@@ -90,8 +89,6 @@ def get_all_accounts():
 def put_account(account_dict):
     print('put_account(): ' + json.dumps(account_dict))
 
-    dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table(dynamodb_table)
     db_result = table.put_item(Item=account_dict)
     print(db_result)
 
@@ -104,8 +101,6 @@ def put_account(account_dict):
 
 def delete_account(id):
     print('delete_account() id: ' + id)
-    dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table(dynamodb_table)
 
     #delete_item always returns a success '200' response even if item
     # does not exist
@@ -129,10 +124,15 @@ def handler(event, context):
     response = {
         "statusCode": None,
         "headers": {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
         },
         "body": None
     }
+
+    if event['httpMethod'] == 'OPTIONS':
+        response['statusCode'] = 200
+        response['headers']['Access-Control-Allow-Methods'] = "GET,PUT,POST,DELETE"
 
     if event['httpMethod'] == 'GET':
         print('GET')
@@ -201,11 +201,12 @@ def handler(event, context):
 
     #Update account
     elif event['httpMethod'] == 'PUT':
-        print('POST')
+        print('PUT')
 
         if event['resource'] == "/account/{id}":
 
             body = json.loads(event['body'])
+            body['id'] = event['pathParameters']['id']
             result = put_account(body)
 
             if result:

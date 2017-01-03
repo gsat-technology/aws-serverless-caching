@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 
 <html lang="en">
-  
+
   <head>
     <title>jQuery Custom Fields Plugin Demo</title>
     <meta name="viewport" content="width=device-width">
@@ -10,16 +10,20 @@
     <link href="./font-awesome-4.7.0/css/font-awesome.css" rel="stylesheet">
     <link href="./css/jquerysctipttop.css" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="./css/main.css">
-  </head> 
-  
+
+  </head>
+
   <body>
     <div class="container">
+        <input type="text" class="form-control" id="URLInput" placeholder="API Gateway URL">
+        <button id="refresh-button" class="btn btn-primary"><span class="fa fa-refresh"></span> Refresh</button>
         <table id="data" class="table table-striped table-condensed">
         </table>
+        <button id="add-button" type="button" class="btn btn-success">new account</button>
     </div>
     <script src="./js/jquery.min.js"></script>
     <script type="text/javascript" src="./js/bootstrap.min.js"></script>
-    <button id="add-button" type="button">+</button>
+    <script type="text/javascript" src="js/options.js"></script>
     <script type="text/javascript" src="js/custom-fields.js"></script>
   </body>
 

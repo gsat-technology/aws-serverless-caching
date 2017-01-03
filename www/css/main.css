@@ -1,15 +1,13 @@
-body { font-size: 12px; }
+body { font-size: 15px;
+}
 .table thead {
-    background-color: rgb(253, 199, 69);
-    background: -webkit-linear-gradient(top, rgb(172, 255, 133) 0%, rgb(40, 196, 63) 100%);
-    background: -o-linear-gradient(top, rgb(172, 255, 133) 0%, rgb(40, 196, 63) 100%);
-    background: -ms-linear-gradient(top, rgb(172, 255, 133) 0%, rgb(40, 196, 63) 100%);
-    background: -moz-linear-gradient(top, rgb(172, 255, 133) 0%, rgb(40, 196, 63) 100%);
-    background: linear-gradient(to bottom, rgb(172, 255, 133) 0%, rgb(40, 196, 63) 100%);
+    background-color: rgb(251, 251, 251);
+    background: rgb(251, 251, 251);
 }
 .table tbody td>span { display:block; padding-top: 1px; padding-bottom: 1px; padding-left: 1px;}
 .table tbody td>span { margin: 3px 5px;}
 .table-condensed>thead>tr>th { padding-left: 10px;}
+
 
 .input-sm, select.input-sm { height: 25px; padding: 3px 5px;}
 select.input-sm { padding: 3px 1px;}
@@ -29,4 +27,14 @@ select.input-sm { padding: 3px 1px;}
 .table {
     width: 100%;
     margin-bottom: 0px;
+}
+
+#add-button {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+#URLInput {
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
