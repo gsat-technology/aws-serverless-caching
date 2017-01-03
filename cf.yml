@@ -179,7 +179,7 @@ Resources:
       CacheSubnetGroupName:
         !Ref ElasticacheSubnetGroup
       ClusterName:
-        !Join [ "-", [ !Ref "AWS::StackName", ec ] ]
+        elasticache-demo
       Engine: memcached
       NumCacheNodes: 1
       Port: 11211
@@ -546,7 +546,7 @@ Resources:
       RestApiId:
         !Ref APIGateway
       StageName: demo
-      
+
 
   APIGatewayDemoStage:
     Type: "AWS::ApiGateway::Stage"
