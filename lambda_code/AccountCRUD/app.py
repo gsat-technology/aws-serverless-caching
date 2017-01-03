@@ -1,5 +1,6 @@
 from __future__ import print_function
 import time
+from datetime import datetime, timedelta
 import os
 import uuid
 import json
@@ -113,7 +114,6 @@ def delete_account(id):
 
 
 
-
 def handler(event, context):
     """
     Account CRUD operations
@@ -153,6 +153,7 @@ def handler(event, context):
         if event['resource'] == "/account/{id}":
 
             response_body_dict = get_account(event['pathParameters']['id'], use_cache)
+            response_body_dict['lambda_processed_time'] = (datetime.now() + timedelta(hours=11)).strftime('%d-%m-%Y %H:%M:%S')
 
             if response_body_dict:
                 response['statusCode'] = 200
@@ -164,6 +165,8 @@ def handler(event, context):
         #List accounts
         elif event['resource'] == "/account":
             result = get_all_accounts()
+            result['lambda_processed_time'] = (datetime.now() + timedelta(hours=11)).strftime('%d-%m-%Y %H:%M:%S')
+
             if result:
                 response['statusCode'] = 200
                 response['body'] = json.dumps(result)
@@ -182,10 +185,10 @@ def handler(event, context):
 
             if result:
                 response['statusCode'] = 200
-                response['body'] = json.dumps(result)
             else:
                 response['statusCode'] = 404
-                response['body'] = json.dumps(result)
+
+            response['body'] = json.dumps(result)
 
     #Delete account
     elif event['httpMethod'] == 'DELETE':
