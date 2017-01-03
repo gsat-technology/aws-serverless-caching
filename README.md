@@ -35,16 +35,14 @@ Using the AWS CloudFormation console, upload `cf.yml` and choose parameter value
 Or, using the CLI
 
 ```
-git clone https://github.com/gsat-technology/aws-serverless-caching.git
-cd aws-serverless-caching
-
 AMI="" #add ubuntu 16.04 ubuntu image (appropriate ami for target region)
-KEY_PAIR="" #your existing keypair
-S3_BUCKET="" #aforementioned bucket
+KEY_PAIR="" #your existing aws keypair name
+S3_BUCKET="" #aforementioned bucket (do not add 's3://')
 
 aws cloudformation create-stack \
     --stack-name aws-serverless-caching \
     --template-body file://cf.yml \
+    --capabilities CAPABILITY_IAM \
     --parameters \
                  ParameterKey=UbuntuAMIParameter,ParameterValue=$AMI \
                  ParameterKey=S3ResourceBucket,ParameterValue=$S3_BUCKET \
