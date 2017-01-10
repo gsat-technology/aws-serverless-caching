@@ -49,4 +49,62 @@ aws cloudformation create-stack \
                  ParameterKey=KeyPairParameter,ParameterValue=$KEY_PAIR
 ```
 
-(work in progress - more to come)
+Once stack is completed, you can optionally enable the API Gateway cache:
+
+1. In the console go to API Gateway service area
+2. Click on the API _<stack_name>APIG_ -> Stages -> _demo_deploy_
+3. Select 'Enable API Cache'
+4. Choose _0.5GB_ for _Cache capacity_
+5. Set _Cache time-to-live (TTL)_ to 31536000 (1 yr)
+6. Unselect _Require authorization_
+
+#### Run the Web UI
+
+This can be run locally e.g.
+
+```
+cd www
+python -m SimpleHTTPServer
+```
+then browser to `localhost:8000`
+
+Find the _Invoke URL_ for the stage and paste in at the top of the page.
+
+### Populate Test Data
+
+Invoke `PopulateDynamoDB` lambda function. This will pull data from the S3 bucket and add it to DynamoDB.
+
+### Run Tests
+
+#### Test Latency
+
+Tests the speed difference when using caching (and not using caching)
+
+1. Load test data into database as per above section 'Populate Test Data'
+2. Get account ids and store in local file
+
+```
+curl <invoke_url>/demo_deploy/account 2> /dev/null | jq .accounts[].id --raw-output >> ids.txt
+```
+
+Run `latency.sh`
+
+```
+./latency.sh <url> [--try-cloudfront-cache | --no-try-cloudfront-cache] [--try-elasticache | no-try-elasticache] <seconds>
+```
+
+The script allows you to test two types of caching; API Gateway caching (with CloudFront) and elasticache
+
+- url: API Gateway stage endpoint
+- seconds: number of seconds to run the test for
+
+#### Test Requests Until Cache Hitt
+
+Very basic test that demonstrates how fast a new record gets cached in elasticache by repeatedly creating a new record and then curling attempting to GET the record and testing if the cache was hit.
+
+Note, this is not a particularly scientific test, just enough to show that after data is cached, that the cached data is available very soon after.
+
+`./requests_until_cache_hit.sh <url> <count>`
+
+- url: API Gateway stage endpoint
+- count: number of times to run the test
