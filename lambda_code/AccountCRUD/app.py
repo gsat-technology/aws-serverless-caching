@@ -25,6 +25,20 @@ dynamodb_table = os.environ['dynamodb_table']
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(dynamodb_table)
 
+def should_use_cache(h):
+
+    #if the 'Try-Elasticache' header is set false, _don't_ hit it.
+    # Otherwise if set to anything else (or not set at all) then try hitting elasticache
+
+    try:
+        cache_control = h['Try-Elasticache']
+        if cache_control == 'false':
+            return False
+    except:
+        pass
+
+    return True
+
 
 def get_account(id, use_cache):
     print('get_account() id: ' + id)
@@ -36,7 +50,7 @@ def get_account(id, use_cache):
     #try elasticache?
     if use_cache:
         print('trying cache')
-        response_item['use_cache'] = 'true'
+        response_item['try_elasticache'] = 'true'
         response_item['account'] = memcache_client.get(id)
 
         if response_item['account'] != None:
@@ -51,7 +65,7 @@ def get_account(id, use_cache):
 
     else:
         print('not trying cache')
-        response_item['use_cache'] = 'false'
+        response_item['try_elastiache'] = 'false'
 
     #if elasticache wasn't tried or it tried and missed, then use db
     if response_item['account'] == None:
@@ -137,22 +151,11 @@ def handler(event, context):
     if event['httpMethod'] == 'GET':
         print('GET')
 
-        use_cache = True
-
-        try:
-            cache_control = event['headers']['Cache-Control']
-            print('got the Cache-Control header')
-            if cache_control == 'no-cache':
-                print('got the no-cache header')
-                use_cache = False
-        except:
-            pass
-
 
         #Get account
         if event['resource'] == "/account/{id}":
 
-            response_body_dict = get_account(event['pathParameters']['id'], use_cache)
+            response_body_dict = get_account(event['pathParameters']['id'], should_use_cache(event['headers']))
             response_body_dict['lambda_processed_time'] = (datetime.now() + timedelta(hours=11)).strftime('%d-%m-%Y %H:%M:%S')
 
             if response_body_dict:
