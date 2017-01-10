@@ -500,6 +500,8 @@ Resources:
     Properties:
       AuthorizationType: NONE
       HttpMethod: ANY
+      RequestParameters:
+        method.request.path.id: true
       ResourceId:
         !Ref APIGAccountIDResource
       RestApiId:
@@ -545,20 +547,7 @@ Resources:
     Properties:
       RestApiId:
         !Ref APIGateway
-      StageName: demo
-
-
-  APIGatewayDemoStage:
-    Type: "AWS::ApiGateway::Stage"
-    Properties:
-      CacheClusterEnabled: true
-      CacheClusterSize: 0.5
-      DeploymentId:
-        !Ref APIGDeploymentDemo
-      Description: demo stage
-      RestApiId:
-        !Ref APIGateway
-      StageName: demo
+      StageName: demo_deploy
 
 
 Outputs:
