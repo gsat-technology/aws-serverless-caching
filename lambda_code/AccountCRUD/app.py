@@ -121,6 +121,7 @@ def delete_account(id):
     # does not exist
     try:
         db_result = table.delete_item(Key={'id': id})
+        print('deleted')
     except:
         return False
 
@@ -147,6 +148,7 @@ def handler(event, context):
     if event['httpMethod'] == 'OPTIONS':
         response['statusCode'] = 200
         response['headers']['Access-Control-Allow-Methods'] = "GET,PUT,POST,DELETE"
+        response['headers']['Access-Control-Allow-Headers'] = "Cache-Control"
 
     if event['httpMethod'] == 'GET':
         print('GET')
@@ -195,6 +197,8 @@ def handler(event, context):
 
     #Delete account
     elif event['httpMethod'] == 'DELETE':
+        print('DELETE')
+
         if event['resource'] == "/account/{id}":
             result = delete_account(event['pathParameters']['id'])
 
