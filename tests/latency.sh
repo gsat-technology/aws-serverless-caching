@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#Tests 
+#Tests
 
 
 echo ""
@@ -8,7 +8,7 @@ echo ""
 #bail out if params are no good
 if [ $# -ne 4 ]
 then
-    echo  "usage: $0 <url> [--try-cloudfront-cache | --no-try-cloudfront-cache] [--try-elasticache | no-try-elasticache] <seconds>"
+    echo  "usage: $0 <url> [--try-apig-cache | --no-try-apig-cache] [--try-elasticache | no-try-elasticache] <seconds>"
     echo ""
     exit
 fi
@@ -20,15 +20,15 @@ for key in "$@"
 do
 
     case $key in
-	--try-cloudfront-cache)
-            echo "cloudfront cache will be tried"
-	    CLOUDFRONT=true
-	    MAX_AGE=31536000 #1 year 
-	    shift 
+	--try-apig-cache)
+            echo "apig cache will be tried"
+	    apig=true
+	    MAX_AGE=31536000 #1 year
+	    shift
 	    ;;
-	--no-try-cloudfront-cache)
-	    echo "cloudfront cache will not be tried"
-	    CLOUDFRONT=false
+	--no-try-apig-cache)
+	    echo "apig cache will not be tried"
+	    apig=false
 	    MAX_AGE=0
 	    shift # past argument
 	    ;;
@@ -45,7 +45,7 @@ do
 	    # unknown option
 	    ;;
     esac
-    shift 
+    shift
 done
 
 echo "url: $URL"
@@ -81,7 +81,7 @@ do
 
 	echo $URL/account/$ACC
         curl $URL/account/$ACC -H "Cache-Control:max-age=$MAX_AGE" -H "Try-Elasticache:$ELASTICACHE" 2> /dev/null | jq
-	
-	let COUNTER=COUNTER+1 
+
+	let COUNTER=COUNTER+1
     done
 done
