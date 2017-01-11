@@ -58,6 +58,16 @@ Once stack is completed, you can optionally enable the API Gateway cache:
 5. Set _Cache time-to-live (TTL)_ to 31536000 (1 yr)
 6. Unselect _Require authorization_
 
+Note: to enable per-item caching for accounts items i.e. _/account/<some_item_id>_,  you will need to:
+
+1. Goto Resources
+2. Click on the _ANY_ method under _/account/{id}_
+3. Click _method request
+4. Expand _Request Paths_
+5. tick the _Caching_ checkbox for _id_
+6. Redploy the Stage for change to take effect
+
+
 #### Run the Web UI
 
 This can be run locally e.g.
@@ -84,7 +94,7 @@ Tests the speed difference when using caching (and not using caching)
 2. Get account ids and store in local file
 
 ```
-curl <invoke_url>/demo_deploy/account 2> /dev/null | jq .accounts[].id --raw-output >> ids.txt
+curl <invoke_url>/account 2> /dev/null | jq .accounts[].id --raw-output >> ids.txt
 ```
 
 Run `latency.sh`
