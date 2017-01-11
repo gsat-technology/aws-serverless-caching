@@ -32,19 +32,22 @@ do
   echo "new record: $ID"
   
   #POST to create the account
-  curl --data "$ACCOUNT" $URL/account &>/dev/null
+  curl -v --data "$ACCOUNT" $URL/account -H "Cache-Control:max-age=0" &>/dev/null
+  #curl -v --data "$ACCOUNT" $URL/account -H "Cache-Control:max-age=0"
+
 
   #keep trying to get a cached response
   while [ 1 ]
   do
     #GET the account
-    RESULT=$(curl $URL/account/$ID 2>/dev/null | jq .cache_lookup --raw-output)
+    RESULT=$(curl $URL/account/$ID -H "Cache-Control:max-age=0" 2>/dev/null | jq .cache_lookup --raw-output)
+    #curl $URL/account/$ID -H "Cache-Control:max-age=0"
     
     if [ "$RESULT" == "HIT" ]
     then
 	echo "  HIT"
 	echo ""
-        curl -X DELETE $URL/account/$ID > /dev/null 2>&1
+        curl -X DELETE $URL/account/$ID -H "Cache-Control:max-age=0" > /dev/null 2>&1
 	let COUNTER=COUNTER+1
         break   # <-- break once there's a cache HIT
 

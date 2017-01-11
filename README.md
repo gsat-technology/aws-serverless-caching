@@ -108,7 +108,7 @@ The script allows you to test two types of caching; API Gateway caching (with Cl
 - url: API Gateway stage endpoint
 - seconds: number of seconds to run the test for
 
-#### Test Requests Until Cache Hitt
+#### Test Requests Until Cache Hit
 
 Very basic test that demonstrates how fast a new record gets cached in elasticache by repeatedly creating a new record and then curling attempting to GET the record and testing if the cache was hit.
 
