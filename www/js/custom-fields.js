@@ -371,19 +371,7 @@ function addRow() {
 function deleteItem(e) {
 	console.log("deleteItem()");
 	var id = $(e).attr('delete-id');
-
-	//1. call API to delete
-	$.ajax({
-    url: URL + '/account/' + id,
-    type: 'DELETE',
-    success: function(result) {
-        console.log(result);
-				if(result.success) {
-					  delete customFields.data[id];
-						$('tr[data-id=' + id + ']').remove();
-				}
-    }
-  });
+	ajaxDELETEAccount(id);
 }
 
 function getAPIGURL() {
@@ -450,5 +438,21 @@ function ajaxPOSTAccount(record, cb) {
 		$.post( getAPIGURL() + '/account', JSON.stringify(record)).done(function( data ) {
 		    console.log("Data Loaded: " + JSON.stringify(data));
 				cb(record);
+  });
+}
+
+function ajaxDELETEAccount(id) {
+	console.log('ajaxDELETEAccount() id: ' + id);
+
+	$.ajax({
+    url: getAPIGURL() + '/account/' + id,
+    type: 'DELETE',
+    success: function(result) {
+        console.log(result);
+				if(result.success) {
+					  delete customFields.data[id];
+						$('tr[data-id=' + id + ']').remove();
+				}
+    }
   });
 }
